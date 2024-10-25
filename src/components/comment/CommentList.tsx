@@ -6,7 +6,7 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { formatDate } from '@/utils/formatDate'
-import { useAuthStore } from '@/stores/authStore' // 세션 ID를 가져오기 위해 사용
+import { useAuthStore } from '@/stores/authStore'
 
 // 댓글 데이터의 타입을 정의
 interface Comment {
@@ -39,7 +39,7 @@ const CommentList = () => {
 			}
 		}
 
-		fetchComments() // 컴포넌트가 마운트될 때 서버에서 댓글 데이터를 가져옴
+		fetchComments()
 	}, [postId])
 
 	// 댓글 삭제 함수
@@ -50,7 +50,7 @@ const CommentList = () => {
 				`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/member/${commentId}`,
 				{
 					headers: {
-						'SESSION-ID': sessionId, // 세션 ID를 헤더에 포함
+						'SESSION-ID': sessionId,
 					},
 				},
 			)

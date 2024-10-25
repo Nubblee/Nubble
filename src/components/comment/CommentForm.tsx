@@ -66,7 +66,6 @@ const CommentForm = () => {
 				const res = await postGuestComment()
 				console.log('비로그인 댓글 제출', res.data)
 			} else {
-				// 로그인된 상태일 때 다른 API 요청 로직 추가 (예: postComment)
 				const res = await postMemberComment()
 				console.log('비로그인 댓글 제출', res.data)
 			}
