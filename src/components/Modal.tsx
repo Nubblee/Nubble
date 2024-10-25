@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
-import useModalStore from '@/stores/useModalStore'
+import useModalStore from '@/stores/modalStore'
 
 const Modal = () => {
 	const { isOpen, modalData, closeModal } = useModalStore()
