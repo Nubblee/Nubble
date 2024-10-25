@@ -19,6 +19,7 @@ import Toast from '@components/Toast'
 const WritePage = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
+	const { state } = useLocation()
 	const queryParams = new URLSearchParams(location.search)
 	const id = queryParams.get('id')
 	const fileRef = useRef<HTMLInputElement>(null)
@@ -47,6 +48,7 @@ const WritePage = () => {
 	} = useWrite()
 	const { uploadFile } = useFileUpload()
 	const { sessionId } = useAuthStore()
+	const [post, setPost] = useState(state?.postData || null)
 
 	const handleUploadFile = () => {
 		if (fileRef.current) {
@@ -109,7 +111,13 @@ const WritePage = () => {
 		setDescription(markdownContent)
 		setCategory(category)
 		setBoard(board)
-		navigate('/preview')
+
+		navigate('/preview', {
+			state: {
+				isEditing,
+				post: { title: markdownTitle, content: markdownContent, category, board, id },
+			},
+		})
 	}
 
 	const handleDraft = async () => {
@@ -136,18 +144,17 @@ const WritePage = () => {
 			toast.error('임시저장에 실패했는데요?😱')
 		}
 	}
-	// useEffect(() => {
-	// 	if (id) {
-	// 		setIsEditing(true)
-	// 		const post = postsData[id]
-	// 		if (post) {
-	// 			setTitle(post.markdownTitle)
-	// 			setContent(post.content)
-	// 			setSelectedCategory(post.category)
-	// 			setSelectedSubCategory(post.subCategory)
-	// 		}
-	// 	}
-	// }, [id])
+
+	useEffect(() => {
+		if (id && post) {
+			setIsEditing(true)
+
+			setTitle(post.title)
+			setContent(post.content)
+			setCategory(post.category)
+			setBoard(post.subCategory)
+		}
+	}, [id, post])
 
 	useEffect(() => {
 		if (category) {
@@ -217,7 +224,13 @@ const WritePage = () => {
 							임시저장
 						</Button>
 						{isEditing ? (
-							<Button radius={50}>수정하기</Button>
+							<Button
+								radius={50}
+								onClick={handleSubmit}
+								disabled={!(markdownTitle && markdownContent && category && board)}
+							>
+								수정하기
+							</Button>
 						) : (
 							<Button
 								radius={50}

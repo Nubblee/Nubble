@@ -10,7 +10,7 @@ import Toast from '@components/Toast'
 import styled from '@emotion/styled'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface PostData {
 	postId: number
@@ -28,6 +28,11 @@ const PostDetail = () => {
 	const [postData, setPostData] = useState<PostData | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const { sessionId } = useAuthStore()
+	const navigate = useNavigate()
+
+	const handlePostEdit = () => {
+		navigate(`/write?id=${postId}`, { state: { postData } })
+	}
 
 	useEffect(() => {
 		const fetchPostData = async () => {
@@ -73,16 +78,14 @@ const PostDetail = () => {
 								<span>{postData.userNickname}</span>
 							</DateName>
 							<EditDelete>
-								<button>수정</button>
+								<button onClick={handlePostEdit}>수정</button>
 								<button>삭제</button>
 							</EditDelete>
 						</MetaData>
 					</div>
 				</TitleContainer>
 				<Content>
-					<pre>
-						<RenderMarkdown markdown={postData.content} />
-					</pre>
+					<RenderMarkdown markdown={postData.content} />
 				</Content>
 				<CommentForm />
 				<CommentList />

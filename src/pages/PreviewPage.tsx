@@ -7,7 +7,7 @@ import Button from '@components/Button'
 import useGoBack from '@/hooks/useGoBack'
 import useWrite from '@/hooks/useWrite'
 import useFileUpload from '@/hooks/useFileUpload'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import axios from 'axios'
 import { ShowToast } from '@components/Toast'
@@ -28,6 +28,8 @@ const PreviewPage = () => {
 	const fileRef = useRef<HTMLInputElement>(null)
 	const navigate = useNavigate()
 	const { sessionId } = useAuthStore()
+	const location = useLocation()
+	const { isEditing, post } = location.state || ''
 
 	const handleBack = useGoBack()
 
@@ -54,10 +56,16 @@ const PreviewPage = () => {
 	}
 
 	const handleSubmit = async () => {
+		const method = isEditing ? 'put' : 'post'
+		const url = isEditing
+			? `${import.meta.env.VITE_NUBBLE_SERVER}/posts/${post.id}`
+			: `${import.meta.env.VITE_NUBBLE_SERVER}/posts`
+
 		try {
-			const res = await axios.post(
-				`${import.meta.env.VITE_NUBBLE_SERVER}/posts`,
-				{
+			const res = await axios({
+				method,
+				url,
+				data: {
 					title: markdownTitle,
 					content: markdownContent,
 					boardId,
@@ -65,17 +73,17 @@ const PreviewPage = () => {
 					thumbnailUrl: thumbnail,
 					description,
 				},
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						'SESSION-ID': sessionId,
-					},
+
+				headers: {
+					'Content-Type': 'application/json',
+					'SESSION-ID': sessionId,
 				},
-			)
+			})
 			const { postId } = res.data
-			console.log(postId)
 			navigate(
-				`/postDetail/${boardId === 0 ? '코딩테스트' : '스터디'}/@${userId}/${encodeURIComponent(markdownTitle)}/${postId}`,
+				isEditing
+					? `/postDetail/${boardId === 0 ? '코딩테스트' : '스터디'}/@${userId}/${encodeURIComponent(markdownTitle)}/${post.id}`
+					: `/postDetail/${boardId === 0 ? '코딩테스트' : '스터디'}/@${userId}/${encodeURIComponent(markdownTitle)}/${postId}`,
 			)
 			ShowToast('게시물이 성공적으로 등록되었습니다.', 'success')
 			reset()
