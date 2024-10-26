@@ -2,49 +2,131 @@ import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Trash2 } from 'lucide-react'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { formatDate } from '@/utils/formatDate'
+import { useAuthStore } from '@/stores/authStore'
+import useModalStore from '@/stores/modalStore'
+import Modal from '@components/Modal'
 
-// 댓글 데이터의 타입을 정의
 interface Comment {
-	id: number
-	nickname: string
+	commentId: number
 	content: string
-	date: string
+	createdAt: Date
+	userId: number | null
+	userName: string | null
+	guestName: string | null
+	type: 'MEMBER' | 'GUEST'
 }
 
 const CommentList = () => {
-	const commentsData: Comment[] = [
-		{ id: 1, nickname: '하츄핑', content: '댓글 내용 1', date: '2024년 9월 12일' },
-		{ id: 2, nickname: '하츄핑', content: '댓글 내용 2', date: '2024년 9월 12일' },
-		{ id: 3, nickname: '하츄핑', content: '댓글 내용 3', date: '2024년 9월 12일' },
-	]
+	const { postId } = useParams<{ postId: string }>()
+	const { sessionId } = useAuthStore()
+	const [commentsData, setCommentsData] = useState<Comment[]>([])
+	const [error, setError] = useState<string | null>(null)
+	const { openModal } = useModalStore()
+
+	useEffect(() => {
+		const fetchComments = async () => {
+			try {
+				const res = await axios.get(
+					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/posts/${postId}/comments`,
+				)
+				setCommentsData(res.data.comments)
+			} catch (err) {
+				setError('댓글을 불러오는 중 오류가 발생했습니다.')
+			}
+		}
+
+		fetchComments()
+	}, [postId])
+
+	// 댓글 삭제 함수
+	const handleDelete = async (commentId: number, type: 'MEMBER' | 'GUEST', password?: string) => {
+		try {
+			if (type === 'MEMBER') {
+				await axios.delete(
+					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/member/${commentId}`,
+					{
+						headers: { 'SESSION-ID': sessionId },
+					},
+				)
+			} else {
+				// 비밀번호가 없는 경우 모달을 열어 비밀번호 요청
+				if (!password) {
+					openModal({
+						type: 'password',
+						title: '댓글 삭제 확인',
+						onAction: (inputPassword) => handleDelete(commentId, 'GUEST', inputPassword),
+					})
+					return
+				}
+
+				// 비밀번호가 있는 경우 삭제 요청 진행
+				await axios.delete(
+					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/guest/${commentId}`,
+					{
+						headers: { 'Content-Type': 'application/json' },
+						data: { guestPassword: password },
+					},
+				)
+			}
+
+			// 댓글 삭제 후 상태 업데이트
+			setCommentsData((prevComments) =>
+				prevComments.filter((comment) => comment.commentId !== commentId),
+			)
+		} catch (error) {
+			console.error('댓글 삭제 중 에러 발생:', error)
+		}
+	}
+
+	if (error) return <p>{error}</p>
+	if (!commentsData.length) return <p>댓글이 없습니다.</p>
 
 	return (
 		<List>
 			{commentsData.map((comment) => (
-				<CommentItem key={comment.id} comment={comment} />
+				<CommentItem
+					key={comment.commentId}
+					comment={comment}
+					onDelete={() => handleDelete(comment.commentId, comment.type)}
+				/>
 			))}
 		</List>
 	)
 }
 
-const CommentItem = ({ comment }: { comment: Comment }) => {
+const CommentItem = ({ comment, onDelete }: { comment: Comment; onDelete: () => void }) => {
+	const displayName = comment.type === 'MEMBER' ? comment.userName : comment.guestName
+	const { userName: loggedInUserName } = useAuthStore()
+
+	const canDelete = comment.type === 'GUEST' || comment.userName === loggedInUserName
+
 	return (
 		<Item>
 			<Header>
-				<Nickname>{comment.nickname}</Nickname>
-				<Date>{comment.date}</Date>
+				<Nickname>{displayName}</Nickname>
+				<Date>{formatDate(comment.createdAt)}</Date>
 			</Header>
 			<Content>{comment.content}</Content>
 			<ActionButtons>
-				<DeleteButton>
-					<Trash2 size={14} />
-					<span>삭제</span>
-				</DeleteButton>
+				{canDelete && (
+					<DeleteButton onClick={onDelete}>
+						<Trash2 size={14} />
+						<span>삭제</span>
+					</DeleteButton>
+				)}
 			</ActionButtons>
+			<Modal />
 		</Item>
 	)
 }
 
+export default CommentList
+
+// 스타일 정의
 const List = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -103,10 +185,7 @@ const DeleteButton = styled.button`
 	&:hover {
 		color: ${colors.white};
 	}
-
 	svg {
-		color: inherit; /* 부모의 컬러를 따르도록 설정 */
+		color: inherit;
 	}
 `
-
-export default CommentList

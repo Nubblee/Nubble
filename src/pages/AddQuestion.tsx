@@ -8,7 +8,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore'
 
 interface Question {
-	id: number // problemId 필드로 대체
+	id: number
 	quizDate: string
 	problemTitle: string
 	problemUrl?: string

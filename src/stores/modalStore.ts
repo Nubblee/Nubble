@@ -5,7 +5,7 @@ type ModalType = 'default' | 'password'
 interface ModalData {
 	type: ModalType
 	title: string
-	onAction: () => void
+	onAction: (password?: string) => void // password를 인자로 받을 수 있게 수정
 }
 
 interface ModalStore {

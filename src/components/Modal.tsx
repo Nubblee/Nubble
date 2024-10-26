@@ -1,10 +1,12 @@
 import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
-import useModalStore from '@/stores/useModalStore'
+import { useState } from 'react'
+import useModalStore from '@/stores/modalStore'
 
 const Modal = () => {
 	const { isOpen, modalData, closeModal } = useModalStore()
+	const [password, setPassword] = useState('')
 
 	if (!isOpen || !modalData) return null
 
@@ -16,7 +18,14 @@ const Modal = () => {
 				<div className="title">{title}</div>
 				<div className="content">
 					<div className="content-desc">삭제할거야? 진짜할거야?</div>
-					{type === 'password' && <input type="password" placeholder="비밀번호" />}
+					{type === 'password' && (
+						<input
+							type="password"
+							placeholder="비밀번호"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
+					)}
 				</div>
 				<div className="btn-container">
 					<button className="cancel-btn" onClick={closeModal}>
@@ -25,7 +34,7 @@ const Modal = () => {
 					<button
 						className="confirm-btn"
 						onClick={() => {
-							onAction()
+							onAction(password) // 비밀번호를 onAction에 전달
 							closeModal()
 						}}
 					>
