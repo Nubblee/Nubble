@@ -86,7 +86,7 @@ const RenderMarkdown = ({ markdown }: MarkdownProps) => {
 						return (
 							<img
 								style={{
-									maxWidth: '50%',
+									maxWidth: '90%',
 									justifyContent: 'center',
 									alignItems: 'center',
 									display: 'flex',
