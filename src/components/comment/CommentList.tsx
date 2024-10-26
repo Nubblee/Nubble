@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import { formatDate } from '@/utils/formatDate'
 import { useAuthStore } from '@/stores/authStore'
 import useModalStore from '@/stores/modalStore'
+import Modal from '@components/Modal'
 
 // 댓글 데이터의 타입을 정의
 interface Comment {
@@ -120,6 +121,7 @@ const CommentItem = ({ comment, onDelete }: { comment: Comment; onDelete: () => 
 					</DeleteButton>
 				)}
 			</ActionButtons>
+			<Modal />
 		</Item>
 	)
 }
