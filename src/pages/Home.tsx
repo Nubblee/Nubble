@@ -6,11 +6,11 @@ import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import useCheckSession from '@/hooks/useCheckSession'
 import axios from 'axios'
 import { useCoteData } from '@/hooks/useCoteData'
 import { formatDate } from '@/utils/formatDate'
 import defaultImage from '@/assets/defaultImage.jpeg'
+import Loading from '@components/Loading'
 
 interface Post {
 	createdAt: string
@@ -22,7 +22,6 @@ interface Post {
 }
 
 const Home: React.FC = () => {
-	// useCheckSession()
 	const { isLogin } = useAuthStore()
 	const navigate = useNavigate()
 	const login = useAuthStore((state) => state.login)
@@ -30,6 +29,7 @@ const Home: React.FC = () => {
 	const [studyBoards, setStudyBoards] = useState<Post[]>([])
 	const [selectedTab, setSelectedTab] = useState<'cote' | 'study'>('cote')
 	const [selectedLv, setSelectedLv] = useState<string | null>(null)
+	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
 		const getUserInfo = async () => {
@@ -63,6 +63,7 @@ const Home: React.FC = () => {
 	})
 
 	useEffect(() => {
+		const startTime = performance.now()
 		const getPost = async () => {
 			try {
 				const res = await axios.get(`${import.meta.env.VITE_NUBBLE_SERVER}/boards/1`, {
@@ -72,8 +73,13 @@ const Home: React.FC = () => {
 				})
 				// console.log(res.data.posts)
 				setStudyBoards(res.data.posts)
+				const endTime = performance.now()
+				const duration = endTime - startTime
+				// console.log(`Study API 호출 소요 시간: ${duration.toFixed(2)}ms`)
 			} catch (error) {
 				console.log('스터디 게시글 가져오기 에러------->', error)
+			} finally {
+				setLoading(false)
 			}
 		}
 
@@ -110,68 +116,78 @@ const Home: React.FC = () => {
 					</div>
 					{selectedTab === 'cote' && (
 						<div className="cote-posts">
-							<div className="category">
-								{['Lv0', 'Lv1', 'Lv2', 'Lv3'].map((level) => (
-									<CategoryItem
-										key={level}
-										isSelected={selectedLv === level}
-										onClick={() => setSelectedLv(level)}
-									>
-										{level}
-									</CategoryItem>
-								))}
-							</div>
-							<ul>
-								{filteredCommitData.map((data) => (
-									<Link
-										to={`/postDetail/코딩테스트/@${data.author}/${data.title}`}
-										key={`${data.title}-${data.author}`}
-									>
-										<li className="post-list">
-											<div>
-												<div className="title-container">
-													<div className="title">{data.title}</div>
-													<div className="post-info">
-														<div className="author">{data.author}</div>
-														<div className="date">{formatDate(data.date)}</div>
+							{loading ? (
+								<Loading />
+							) : (
+								<div>
+									<div className="category">
+										{['Lv0', 'Lv1', 'Lv2', 'Lv3'].map((level) => (
+											<CategoryItem
+												key={level}
+												isSelected={selectedLv === level}
+												onClick={() => setSelectedLv(level)}
+											>
+												{level}
+											</CategoryItem>
+										))}
+									</div>
+									<ul>
+										{filteredCommitData.map((data) => (
+											<Link
+												to={`/postDetail/코딩테스트/@${data.author}/${data.title}`}
+												key={`${data.title}-${data.author}`}
+											>
+												<li className="post-list">
+													<div>
+														<div className="title-container">
+															<div className="title">{data.title}</div>
+															<div className="post-info">
+																<div className="author">{data.author}</div>
+																<div className="date">{formatDate(data.date)}</div>
+															</div>
+														</div>
+														<div className="content">{data.content}</div>
 													</div>
-												</div>
-												<div className="content">{data.content}</div>
-											</div>
-										</li>
-									</Link>
-								))}
-							</ul>
+												</li>
+											</Link>
+										))}
+									</ul>
+								</div>
+							)}
 						</div>
 					)}
 
 					{selectedTab === 'study' && (
 						<div className="study-posts">
-							<ul>
-								{studyBoards
-									.map((data) => (
-										<Link
-											to={`/postDetail/스터디/@${data.username}/${data.title}/${data.id}`}
-											key={data.id}
-										>
-											<li className="post-list">
-												<img
-													src={data.thumbnailUrl !== '' ? data.thumbnailUrl : defaultImage}
-													alt={data.title}
-												/>
-												<div>
-													<div className="post-info">
-														<div className="author">{data.username}</div>
-														<div className="date">{data.createdAt.slice(0, 10)}</div>
+							{loading ? (
+								<Loading />
+							) : (
+								<ul>
+									{studyBoards
+										.map((data) => (
+											<Link
+												to={`/postDetail/스터디/@${data.username}/${data.title}/${data.id}`}
+												key={data.id}
+											>
+												<li className="post-list">
+													<img
+														src={data.thumbnailUrl !== '' ? data.thumbnailUrl : defaultImage}
+														alt={data.title}
+													/>
+													<div>
+														<div className="post-info">
+															<div className="author">{data.username}</div>
+															<div className="date">{data.createdAt.slice(0, 10)}</div>
+														</div>
+														<div className="title">{data.title}</div>
+														<div className="content">{data.description}</div>
 													</div>
-													<div className="title">{data.title}</div>
-													<div className="content">{data.description}</div>
-												</div>
-											</li>
-										</Link>
-									))
-									.reverse()}
-							</ul>
+												</li>
+											</Link>
+										))
+										.reverse()}
+								</ul>
+							)}
 						</div>
 					)}
 				</PostContainer>
