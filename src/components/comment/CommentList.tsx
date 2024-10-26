@@ -10,7 +10,6 @@ import { useAuthStore } from '@/stores/authStore'
 import useModalStore from '@/stores/modalStore'
 import Modal from '@components/Modal'
 
-// 댓글 데이터의 타입을 정의
 interface Comment {
 	commentId: number
 	content: string
@@ -23,7 +22,7 @@ interface Comment {
 
 const CommentList = () => {
 	const { postId } = useParams<{ postId: string }>()
-	const { sessionId, userName: loggedInUserName } = useAuthStore()
+	const { sessionId } = useAuthStore()
 	const [commentsData, setCommentsData] = useState<Comment[]>([])
 	const [error, setError] = useState<string | null>(null)
 	const { openModal } = useModalStore()
@@ -56,7 +55,6 @@ const CommentList = () => {
 			} else {
 				// 비밀번호가 없는 경우 모달을 열어 비밀번호 요청
 				if (!password) {
-					console.log('비번없음')
 					openModal({
 						type: 'password',
 						title: '댓글 삭제 확인',
@@ -70,7 +68,7 @@ const CommentList = () => {
 					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/guest/${commentId}`,
 					{
 						headers: { 'Content-Type': 'application/json' },
-						data: { guestName: loggedInUserName, guestPassword: password },
+						data: { guestPassword: password },
 					},
 				)
 			}
