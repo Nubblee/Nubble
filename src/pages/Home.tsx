@@ -166,7 +166,7 @@ const Home: React.FC = () => {
 									{studyBoards
 										.map((data) => (
 											<Link
-												to={`/postDetail/스터디/@${data.username}/${data.title}/${data.id}`}
+												to={`/postDetail/스터디/@${data.username}/${encodeURIComponent(data.title)}/${data.id}`}
 												key={data.id}
 											>
 												<li className="post-list">
