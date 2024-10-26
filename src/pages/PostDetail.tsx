@@ -29,11 +29,12 @@ const PostDetail = () => {
 	const [error, setError] = useState<string | null>(null)
 	const { sessionId } = useAuthStore()
 	const navigate = useNavigate()
+	const { userName } = useAuthStore()
 
 	const handlePostEdit = () => {
 		navigate(`/write?id=${postId}`, { state: { postData } })
 	}
-
+	console.log(postData)
 	useEffect(() => {
 		const fetchPostData = async () => {
 			try {
@@ -77,10 +78,14 @@ const PostDetail = () => {
 								<span>{formatDate(postData.createdAt)}</span>
 								<span>{postData.userNickname}</span>
 							</DateName>
-							<EditDelete>
-								<button onClick={handlePostEdit}>수정</button>
-								<button>삭제</button>
-							</EditDelete>
+							{userName === postData.userNickname ? (
+								<EditDelete>
+									<button onClick={handlePostEdit}>수정</button>
+									<button>삭제</button>
+								</EditDelete>
+							) : (
+								''
+							)}
 						</MetaData>
 					</div>
 				</TitleContainer>

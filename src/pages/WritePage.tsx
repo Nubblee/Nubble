@@ -146,21 +146,20 @@ const WritePage = () => {
 	}
 
 	useEffect(() => {
-		if (id && post) {
-			setIsEditing(true)
-
-			setTitle(post.title)
-			setContent(post.content)
-			setCategory(post.category)
-			setBoard(post.subCategory)
+		if (board) {
+			setBoardId(Number(board))
 		}
-	}, [id, post])
+	}, [board])
 
 	useEffect(() => {
-		if (category) {
-			setBoardId(Number(category))
+		if (id && post) {
+			setIsEditing(true)
+			setTitle(post.title)
+			setContent(post.content)
+			setCategory(post.categoryId)
+			setBoard(post.boardId)
 		}
-	}, [category])
+	}, [id, post])
 
 	return (
 		<Container>
