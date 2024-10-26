@@ -4,7 +4,7 @@ import BestContents from '@components/BestContents'
 import Banner from '@components/Banner'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import axios from 'axios'
 import { useCoteData } from '@/hooks/useCoteData'
@@ -24,10 +24,13 @@ interface Post {
 const Home: React.FC = () => {
 	const { isLogin } = useAuthStore()
 	const navigate = useNavigate()
+	const location = useLocation()
 	const login = useAuthStore((state) => state.login)
 	const { commitData } = useCoteData()
 	const [studyBoards, setStudyBoards] = useState<Post[]>([])
-	const [selectedTab, setSelectedTab] = useState<'cote' | 'study'>('cote')
+	const queryParams = new URLSearchParams(location.search)
+	const initialTab = (queryParams.get('tab') as 'cote' | 'study') || 'cote'
+	const [selectedTab, setSelectedTab] = useState<'cote' | 'study'>(initialTab)
 	const [selectedLv, setSelectedLv] = useState<string | null>(null)
 	const [loading, setLoading] = useState(true)
 
@@ -56,6 +59,11 @@ const Home: React.FC = () => {
 		}
 		getUserInfo()
 	}, [login])
+
+	const handleTabChange = (tab: 'cote' | 'study') => {
+		setSelectedTab(tab)
+		navigate(`?tab=${tab}`)
+	}
 
 	const filteredCommitData = commitData.filter((data) => {
 		if (!selectedLv) return true
@@ -93,12 +101,12 @@ const Home: React.FC = () => {
 				<PostContainer>
 					<div className="menu">
 						<div className="menu-list">
-							<MenuItem isSelected={selectedTab === 'cote'} onClick={() => setSelectedTab('cote')}>
+							<MenuItem isSelected={selectedTab === 'cote'} onClick={() => handleTabChange('cote')}>
 								코딩테스트
 							</MenuItem>
 							<MenuItem
 								isSelected={selectedTab === 'study'}
-								onClick={() => setSelectedTab('study')}
+								onClick={() => handleTabChange('study')}
 							>
 								스터디
 							</MenuItem>
