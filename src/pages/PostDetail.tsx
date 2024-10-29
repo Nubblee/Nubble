@@ -24,7 +24,7 @@ interface PostData {
 }
 
 const PostDetail = () => {
-	const { postId } = useParams<{ postId: string }>()
+	const { title, postId } = useParams<{ title: string; postId: string }>()
 	const [postData, setPostData] = useState<PostData | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const { sessionId } = useAuthStore()
@@ -34,7 +34,9 @@ const PostDetail = () => {
 	const handlePostEdit = () => {
 		navigate(`/write?id=${postId}`, { state: { postData } })
 	}
+
 	console.log(postData)
+
 	useEffect(() => {
 		const fetchPostData = async () => {
 			try {
@@ -44,6 +46,11 @@ const PostDetail = () => {
 					},
 				})
 				setPostData(res.data)
+				console.log(res.data)
+
+				if (res.data.title !== title) {
+					navigate('/error') // 에러 페이지 경로에 맞게 수정
+				}
 			} catch (err: unknown) {
 				if (axios.isAxiosError(err)) {
 					setError(err.response?.data?.message || '게시글을 가져오는 데 실패했습니다.')
