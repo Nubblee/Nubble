@@ -1,37 +1,27 @@
-import React from 'react'
 import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Heart } from 'lucide-react'
 
-const coteContents = [
-	{
-		id: 1,
-		title: 'Recoil, Justand',
-		userName: '손성오',
-		likes: 72,
-	},
-	{
-		id: 2,
-		title: 'Next.js 공부하는 법',
-		userName: '박지영',
-		likes: 68,
-	},
-	{
-		id: 3,
-		title: 'React.FC를 꼭 써야...',
-		userName: '김수민',
-		likes: 57,
-	},
-]
+interface ContentItem {
+	id: number
+	title: string
+	userName: string
+	likes: number
+}
 
-const BestContents = () => {
+interface BestContentsProps {
+	title: string
+	content: ContentItem[]
+}
+
+const BestContents = ({ title, content }: BestContentsProps) => {
 	return (
 		<Container>
-			<div className="title">베스트 스터디 내용</div>
+			<div className="title">{title}</div>
 			<Ranking>
 				<ol>
-					{coteContents.map(({ id, title, userName, likes }) => (
+					{content.map(({ id, title, userName, likes }) => (
 						<li key={id} className="list-container">
 							<div>
 								{id}. <span>{title}</span>
