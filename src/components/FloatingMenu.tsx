@@ -1,16 +1,20 @@
 /** @jsxImportSource @emotion/react */
-import styled from '@emotion/styled'
-import { useState } from 'react'
-import { HeartIcon, Share2Icon } from 'lucide-react'
 import colors from '@/constants/color'
+import { useAuthStore } from '@/stores/authStore'
+import { useLikeStore } from '@/stores/likeStore'
+import styled from '@emotion/styled'
+import { HeartIcon, Share2Icon } from 'lucide-react'
+import { useParams } from 'react-router-dom'
 
 const FloatingMenu = () => {
-	const [liked, setLiked] = useState(false)
-	const [likeCount, setLikeCount] = useState(0)
+	const { liked, likeCount, toggleLike } = useLikeStore()
 
-	const handleLikeClick = () => {
-		setLiked(!liked)
-		setLikeCount(liked ? likeCount - 1 : likeCount + 1)
+	const { sessionId } = useAuthStore()
+	const { postId } = useParams<{ postId: string }>()
+
+	const handleLikeClick = async () => {
+		if (!postId) return
+		toggleLike(postId, sessionId as string)
 	}
 
 	const handleCopyUrl = async () => {
@@ -19,7 +23,7 @@ const FloatingMenu = () => {
 			await navigator.clipboard.writeText(currentUrl)
 			alert('클립보드에 링크가 복사되었어요.')
 		} catch (err) {
-			console.log(err)
+			console.error('링크 복사 실패:', err)
 		}
 	}
 
@@ -56,19 +60,19 @@ const MenuContainer = styled.div`
 	border-radius: 30px;
 	transition:
 		left 0.3s ease,
-		top 0.3s ease; /* 위치 변경을 부드럽게 만듦 */
+		top 0.3s ease;
 
 	@media (max-width: 1440px) {
-		left: 12%; /* 1440px 이하에서 점진적으로 변경 */
+		left: 12%;
 		top: 26%;
 	}
 
 	@media (max-width: 1280px) {
-		left: 9%; /* 1280px 이하에서 위치 변경 */
+		left: 9%;
 	}
 
 	@media (max-width: 1090px) {
-		display: none; /* 1080px 이하에서는 메뉴를 숨김 */
+		display: none;
 	}
 `
 

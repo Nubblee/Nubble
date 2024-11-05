@@ -67,7 +67,7 @@ const CommentForm = () => {
 				console.log('비로그인 댓글 제출', res.data)
 			} else {
 				const res = await postMemberComment()
-				console.log('비로그인 댓글 제출', res.data)
+				console.log('멤버 댓글 제출', res.data)
 			}
 			setSubmitSuccess(true)
 			setFormData({ nickname: '', password: '', comment: '' })
