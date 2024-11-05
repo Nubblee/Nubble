@@ -3,14 +3,63 @@ import styled from '@emotion/styled'
 import { useState } from 'react'
 import { HeartIcon, Share2Icon } from 'lucide-react'
 import colors from '@/constants/color'
+import axios from 'axios'
+import { useAuthStore } from '@/stores/authStore'
+import { useParams } from 'react-router-dom'
 
-const FloatingMenu = () => {
-	const [liked, setLiked] = useState(false)
-	const [likeCount, setLikeCount] = useState(0)
+interface IFloatingMenuProps {
+	liked: boolean
+	likeCount: number
+	onLikeUpdate: (liked: boolean, likeCount: number) => void
+}
 
-	const handleLikeClick = () => {
-		setLiked(!liked)
-		setLikeCount(liked ? likeCount - 1 : likeCount + 1)
+const FloatingMenu = ({
+	liked: initialLiked,
+	likeCount: initialLikeCount,
+	onLikeUpdate,
+}: IFloatingMenuProps) => {
+	const [liked, setLiked] = useState(initialLiked)
+	const [likeCount, setLikeCount] = useState(initialLikeCount)
+	const { sessionId } = useAuthStore()
+	const { postId } = useParams<{ postId: string }>()
+
+	const handleLikeClick = async () => {
+		if (!postId) return
+
+		try {
+			if (liked) {
+				await axios.delete(`${import.meta.env.VITE_NUBBLE_SERVER}/posts/${postId}/likes`, {
+					headers: {
+						'SESSION-ID': sessionId,
+					},
+				})
+				setLiked(false)
+				setLikeCount((prevCount) => prevCount - 1)
+				onLikeUpdate(false, likeCount - 1)
+			} else {
+				await axios.put(
+					`${import.meta.env.VITE_NUBBLE_SERVER}/posts/${postId}/likes`,
+					{},
+					{
+						headers: {
+							'SESSION-ID': sessionId,
+						},
+					},
+				)
+				setLiked(true)
+				setLikeCount((prevCount) => prevCount + 1)
+				onLikeUpdate(true, likeCount + 1)
+			}
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				console.error('좋아요 요청 실패 - 메시지:', err.message)
+				console.error('좋아요 요청 실패 - 상태 코드:', err.response?.status)
+				console.error('좋아요 요청 실패 - 응답 데이터:', err.response?.data)
+			} else {
+				console.error('예상치 못한 에러:', err)
+			}
+			alert('좋아요 요청 중 문제가 발생했습니다. 서버 관리자에게 문의하세요.')
+		}
 	}
 
 	const handleCopyUrl = async () => {
@@ -19,7 +68,7 @@ const FloatingMenu = () => {
 			await navigator.clipboard.writeText(currentUrl)
 			alert('클립보드에 링크가 복사되었어요.')
 		} catch (err) {
-			console.log(err)
+			console.error('링크 복사 실패:', err)
 		}
 	}
 
@@ -56,19 +105,19 @@ const MenuContainer = styled.div`
 	border-radius: 30px;
 	transition:
 		left 0.3s ease,
-		top 0.3s ease; /* 위치 변경을 부드럽게 만듦 */
+		top 0.3s ease;
 
 	@media (max-width: 1440px) {
-		left: 12%; /* 1440px 이하에서 점진적으로 변경 */
+		left: 12%;
 		top: 26%;
 	}
 
 	@media (max-width: 1280px) {
-		left: 9%; /* 1280px 이하에서 위치 변경 */
+		left: 9%;
 	}
 
 	@media (max-width: 1090px) {
-		display: none; /* 1080px 이하에서는 메뉴를 숨김 */
+		display: none;
 	}
 `
 

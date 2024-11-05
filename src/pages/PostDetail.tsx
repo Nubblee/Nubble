@@ -27,6 +27,8 @@ const PostDetail = () => {
 	const { title, postId } = useParams<{ title: string; postId: string }>()
 	const [postData, setPostData] = useState<PostData | null>(null)
 	const [error, setError] = useState<string | null>(null)
+	const [likeCount, setLikeCount] = useState(0)
+	const [liked, setLiked] = useState(false)
 	const { sessionId } = useAuthStore()
 	const navigate = useNavigate()
 	const { userName } = useAuthStore()
@@ -46,6 +48,8 @@ const PostDetail = () => {
 					},
 				})
 				setPostData(res.data)
+				setLikeCount(res.data.likeCount) // 초기 좋아요 수 설정
+				setLiked(res.data.postLiked) // 초기 좋아요 상태 설정
 				console.log(res.data)
 
 				if (res.data.title !== title) {
@@ -75,7 +79,14 @@ const PostDetail = () => {
 	return (
 		<Container>
 			<Toast />
-			<FloatingMenu />
+			<FloatingMenu
+				liked={liked}
+				likeCount={likeCount}
+				onLikeUpdate={(newLiked, newLikeCount) => {
+					setLiked(newLiked)
+					setLikeCount(newLikeCount)
+				}}
+			/>
 			<Wrapper key={`${postData.title}-${postData.userNickname}`}>
 				<TitleContainer>
 					<div>
