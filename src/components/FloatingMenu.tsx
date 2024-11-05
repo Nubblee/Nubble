@@ -1,65 +1,20 @@
 /** @jsxImportSource @emotion/react */
-import styled from '@emotion/styled'
-import { useState } from 'react'
-import { HeartIcon, Share2Icon } from 'lucide-react'
 import colors from '@/constants/color'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore'
+import { useLikeStore } from '@/stores/likeStore'
+import styled from '@emotion/styled'
+import { HeartIcon, Share2Icon } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
-interface IFloatingMenuProps {
-	liked: boolean
-	likeCount: number
-	onLikeUpdate: (liked: boolean, likeCount: number) => void
-}
+const FloatingMenu = () => {
+	const { liked, likeCount, toggleLike } = useLikeStore()
 
-const FloatingMenu = ({
-	liked: initialLiked,
-	likeCount: initialLikeCount,
-	onLikeUpdate,
-}: IFloatingMenuProps) => {
-	const [liked, setLiked] = useState(initialLiked)
-	const [likeCount, setLikeCount] = useState(initialLikeCount)
 	const { sessionId } = useAuthStore()
 	const { postId } = useParams<{ postId: string }>()
 
 	const handleLikeClick = async () => {
 		if (!postId) return
-
-		try {
-			if (liked) {
-				await axios.delete(`${import.meta.env.VITE_NUBBLE_SERVER}/posts/${postId}/likes`, {
-					headers: {
-						'SESSION-ID': sessionId,
-					},
-				})
-				setLiked(false)
-				setLikeCount((prevCount) => prevCount - 1)
-				onLikeUpdate(false, likeCount - 1)
-			} else {
-				await axios.put(
-					`${import.meta.env.VITE_NUBBLE_SERVER}/posts/${postId}/likes`,
-					{},
-					{
-						headers: {
-							'SESSION-ID': sessionId,
-						},
-					},
-				)
-				setLiked(true)
-				setLikeCount((prevCount) => prevCount + 1)
-				onLikeUpdate(true, likeCount + 1)
-			}
-		} catch (err) {
-			if (axios.isAxiosError(err)) {
-				console.error('좋아요 요청 실패 - 메시지:', err.message)
-				console.error('좋아요 요청 실패 - 상태 코드:', err.response?.status)
-				console.error('좋아요 요청 실패 - 응답 데이터:', err.response?.data)
-			} else {
-				console.error('예상치 못한 에러:', err)
-			}
-			alert('좋아요 요청 중 문제가 발생했습니다. 서버 관리자에게 문의하세요.')
-		}
+		toggleLike(postId, sessionId as string)
 	}
 
 	const handleCopyUrl = async () => {

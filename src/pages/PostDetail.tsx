@@ -1,6 +1,7 @@
 import colors from '@/constants/color'
 import { fontSize } from '@/constants/font'
 import { useAuthStore } from '@/stores/authStore'
+import { useLikeStore } from '@/stores/likeStore'
 import { formatDate } from '@/utils/formatDate'
 import CommentForm from '@components/comment/CommentForm'
 import CommentList from '@components/comment/CommentList'
@@ -27,11 +28,10 @@ const PostDetail = () => {
 	const { title, postId } = useParams<{ title: string; postId: string }>()
 	const [postData, setPostData] = useState<PostData | null>(null)
 	const [error, setError] = useState<string | null>(null)
-	const [likeCount, setLikeCount] = useState(0)
-	const [liked, setLiked] = useState(false)
 	const { sessionId } = useAuthStore()
 	const navigate = useNavigate()
 	const { userName } = useAuthStore()
+	const { setLikeData, liked, likeCount } = useLikeStore()
 
 	const handlePostEdit = () => {
 		navigate(`/write?id=${postId}`, { state: { postData } })
@@ -48,12 +48,13 @@ const PostDetail = () => {
 					},
 				})
 				setPostData(res.data)
-				setLikeCount(res.data.likeCount) // 초기 좋아요 수 설정
-				setLiked(res.data.postLiked) // 초기 좋아요 상태 설정
+				if (res.data.postLiked !== liked || res.data.likeCount !== likeCount) {
+					setLikeData(res.data.postLiked, res.data.likeCount)
+				}
 				console.log(res.data)
 
 				if (res.data.title !== title) {
-					navigate('/error') // 에러 페이지 경로에 맞게 수정
+					navigate('/error')
 				}
 			} catch (err: unknown) {
 				if (axios.isAxiosError(err)) {
@@ -79,14 +80,7 @@ const PostDetail = () => {
 	return (
 		<Container>
 			<Toast />
-			<FloatingMenu
-				liked={liked}
-				likeCount={likeCount}
-				onLikeUpdate={(newLiked, newLikeCount) => {
-					setLiked(newLiked)
-					setLikeCount(newLikeCount)
-				}}
-			/>
+			<FloatingMenu />
 			<Wrapper key={`${postData.title}-${postData.userNickname}`}>
 				<TitleContainer>
 					<div>
