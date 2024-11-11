@@ -8,7 +8,7 @@ interface ContentItem {
 	id: number
 	title: string
 	username: string
-	likes: number
+	likeCount: number
 }
 
 interface BestContentsProps {
@@ -22,7 +22,7 @@ const BestContents = ({ title, content }: BestContentsProps) => {
 			<div className="title">{title}</div>
 			<Ranking>
 				<ol>
-					{content.map(({ id, title, username, likes }, i) => (
+					{content.map(({ id, title, username, likeCount }, i) => (
 						<Link to={`/postDetail/스터디/@${username}/${encodeURIComponent(title)}/${id}`}>
 							<li key={id} className="list-container">
 								<div className="title-text">
@@ -31,7 +31,7 @@ const BestContents = ({ title, content }: BestContentsProps) => {
 								<div className="list-info">
 									<div className="user-name">{username}</div>
 									<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
-									<span>{likes}</span>
+									<span>{likeCount}</span>
 								</div>
 							</li>
 						</Link>
