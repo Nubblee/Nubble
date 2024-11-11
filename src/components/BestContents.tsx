@@ -2,11 +2,12 @@ import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Heart } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 interface ContentItem {
 	id: number
 	title: string
-	userName: string
+	username: string
 	likes: number
 }
 
@@ -21,17 +22,19 @@ const BestContents = ({ title, content }: BestContentsProps) => {
 			<div className="title">{title}</div>
 			<Ranking>
 				<ol>
-					{content.map(({ id, title, userName, likes }) => (
-						<li key={id} className="list-container">
-							<div>
-								{id}. <span>{title}</span>
-							</div>
-							<div className="list-info">
-								<div className="user-name">{userName}</div>
-								<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
-								<span>{likes}</span>
-							</div>
-						</li>
+					{content.map(({ id, title, username, likes }, i) => (
+						<Link to={`/postDetail/스터디/@${username}/${encodeURIComponent(title)}/${id}`}>
+							<li key={id} className="list-container">
+								<div className="title-text">
+									{i + 1}. <span>{title}</span>
+								</div>
+								<div className="list-info">
+									<div className="user-name">{username}</div>
+									<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
+									<span>{likes}</span>
+								</div>
+							</li>
+						</Link>
 					))}
 				</ol>
 			</Ranking>
@@ -67,6 +70,13 @@ const Ranking = styled.div`
 			cursor: pointer;
 			text-decoration: underline solid ${colors.white};
 		}
+	}
+
+	.title-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 120px; /* 원하는 너비에 맞게 설정 */
 	}
 
 	.list-info {
