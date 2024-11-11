@@ -1,6 +1,7 @@
 import colors from '@/constants/color'
 import { fontSize } from '@/constants/font'
 import { useAuthStore } from '@/stores/authStore'
+import { useLikeStore } from '@/stores/likeStore'
 import { formatDate } from '@/utils/formatDate'
 import CommentForm from '@components/comment/CommentForm'
 import CommentList from '@components/comment/CommentList'
@@ -30,6 +31,7 @@ const PostDetail = () => {
 	const { sessionId } = useAuthStore()
 	const navigate = useNavigate()
 	const { userName } = useAuthStore()
+	const { setLikeData, liked, likeCount } = useLikeStore()
 
 	const handlePostEdit = () => {
 		navigate(`/write?id=${postId}`, { state: { postData } })
@@ -46,10 +48,13 @@ const PostDetail = () => {
 					},
 				})
 				setPostData(res.data)
+				if (res.data.postLiked !== liked || res.data.likeCount !== likeCount) {
+					setLikeData(res.data.postLiked, res.data.likeCount)
+				}
 				console.log(res.data)
 
 				if (res.data.title !== title) {
-					navigate('/error') // 에러 페이지 경로에 맞게 수정
+					navigate('/error')
 				}
 			} catch (err: unknown) {
 				if (axios.isAxiosError(err)) {
