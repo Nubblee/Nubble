@@ -12,6 +12,27 @@ import { formatDate } from '@/utils/formatDate'
 import defaultImage from '@/assets/defaultImage.jpeg'
 import Loading from '@components/Loading'
 
+const coteContents = [
+	{
+		id: 1,
+		title: 'Lv1. 다트게임',
+		userName: '김수민',
+		likes: 72,
+	},
+	{
+		id: 2,
+		title: 'Lv1. 문자열 뒤의 n글자',
+		userName: '박지영',
+		likes: 68,
+	},
+	{
+		id: 3,
+		title: 'Lv1. 체육복',
+		userName: '손성오',
+		likes: 57,
+	},
+]
+
 interface Post {
 	createdAt: string
 	description: string
@@ -21,7 +42,7 @@ interface Post {
 	username: string
 }
 
-const Home: React.FC = () => {
+const Home = () => {
 	const { isLogin } = useAuthStore()
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -32,6 +53,8 @@ const Home: React.FC = () => {
 	const initialTab = (queryParams.get('tab') as 'cote' | 'study') || 'cote'
 	const [selectedTab, setSelectedTab] = useState<'cote' | 'study'>(initialTab)
 	const [selectedLv, setSelectedLv] = useState<string | null>(null)
+	const [selectedStudy, setSelectedStudy] = useState<string | null>(null)
+	const [bestStudyContents, setBestStudyContents] = useState([])
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
@@ -82,7 +105,7 @@ const Home: React.FC = () => {
 				// console.log(res.data.posts)
 				setStudyBoards(res.data.posts)
 				const endTime = performance.now()
-				const duration = endTime - startTime
+				// const duration = endTime - startTime
 				// console.log(`Study API 호출 소요 시간: ${duration.toFixed(2)}ms`)
 			} catch (error) {
 				console.log('스터디 게시글 가져오기 에러------->', error)
@@ -92,6 +115,29 @@ const Home: React.FC = () => {
 		}
 
 		getPost()
+	}, [])
+
+	useEffect(() => {
+		const getBestStudyContents = async () => {
+			try {
+				const res = await axios.get(
+					`${import.meta.env.VITE_NUBBLE_SERVER}/boards/1/posts/popular`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					},
+				)
+				console.log(res.data.posts.slice(0, 3))
+				setBestStudyContents(res.data.posts.slice(0, 3))
+			} catch (error) {
+				console.log('베스트 스터디 게시글 가져오기 에러------->', error)
+			} finally {
+				setLoading(false)
+			}
+		}
+
+		getBestStudyContents()
 	}, [])
 
 	return (
@@ -170,38 +216,51 @@ const Home: React.FC = () => {
 							{loading ? (
 								<Loading />
 							) : (
-								<ul>
-									{studyBoards
-										.map((data) => (
-											<Link
-												to={`/postDetail/스터디/@${data.username}/${encodeURIComponent(data.title)}/${data.id}`}
-												key={data.id}
+								<div>
+									<div className="category">
+										{['CS', 'Next.js'].map((study) => (
+											<CategoryItem
+												key={study}
+												isSelected={selectedStudy === study}
+												onClick={() => setSelectedStudy(study)}
 											>
-												<li className="post-list">
-													<img
-														src={data.thumbnailUrl !== '' ? data.thumbnailUrl : defaultImage}
-														alt={data.title}
-													/>
-													<div>
-														<div className="post-info">
-															<div className="author">{data.username}</div>
-															<div className="date">{data.createdAt.slice(0, 10)}</div>
+												{study}
+											</CategoryItem>
+										))}
+									</div>
+									<ul>
+										{studyBoards
+											.map((data) => (
+												<Link
+													to={`/postDetail/스터디/@${data.username}/${encodeURIComponent(data.title)}/${data.id}`}
+													key={data.id}
+												>
+													<li className="post-list">
+														<img
+															src={data.thumbnailUrl !== '' ? data.thumbnailUrl : defaultImage}
+															alt={data.title}
+														/>
+														<div>
+															<div className="post-info">
+																<div className="author">{data.username}</div>
+																<div className="date">{data.createdAt.slice(0, 10)}</div>
+															</div>
+															<div className="title">{data.title}</div>
+															<div className="content">{data.description}</div>
 														</div>
-														<div className="title">{data.title}</div>
-														<div className="content">{data.description}</div>
-													</div>
-												</li>
-											</Link>
-										))
-										.reverse()}
-								</ul>
+													</li>
+												</Link>
+											))
+											.reverse()}
+									</ul>
+								</div>
 							)}
 						</div>
 					)}
 				</PostContainer>
 				<BestContentsContainer>
-					<BestContents />
-					<BestContents />
+					<BestContents title={'베스트 코딩 테스트'} content={coteContents} />
+					<BestContents title={'베스트 스터디 내용'} content={bestStudyContents} />
 				</BestContentsContainer>
 			</ContentContainer>
 		</Container>

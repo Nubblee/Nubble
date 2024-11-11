@@ -1,47 +1,40 @@
-import React from 'react'
 import styled from '@emotion/styled'
 import colors from '@/constants/color'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Heart } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-const coteContents = [
-	{
-		id: 1,
-		title: 'Recoil, Justand',
-		userName: '손성오',
-		likes: 72,
-	},
-	{
-		id: 2,
-		title: 'Next.js 공부하는 법',
-		userName: '박지영',
-		likes: 68,
-	},
-	{
-		id: 3,
-		title: 'React.FC를 꼭 써야...',
-		userName: '김수민',
-		likes: 57,
-	},
-]
+interface ContentItem {
+	id: number
+	title: string
+	username: string
+	likeCount: number
+}
 
-const BestContents = () => {
+interface BestContentsProps {
+	title: string
+	content: ContentItem[]
+}
+
+const BestContents = ({ title, content }: BestContentsProps) => {
 	return (
 		<Container>
-			<div className="title">베스트 스터디 내용</div>
+			<div className="title">{title}</div>
 			<Ranking>
 				<ol>
-					{coteContents.map(({ id, title, userName, likes }) => (
-						<li key={id} className="list-container">
-							<div>
-								{id}. <span>{title}</span>
-							</div>
-							<div className="list-info">
-								<div className="user-name">{userName}</div>
-								<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
-								<span>{likes}</span>
-							</div>
-						</li>
+					{content.map(({ id, title, username, likeCount }, i) => (
+						<Link to={`/postDetail/스터디/@${username}/${encodeURIComponent(title)}/${id}`}>
+							<li key={id} className="list-container">
+								<div className="title-text">
+									{i + 1}. <span>{title}</span>
+								</div>
+								<div className="list-info">
+									<div className="user-name">{username}</div>
+									<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
+									<span>{likeCount}</span>
+								</div>
+							</li>
+						</Link>
 					))}
 				</ol>
 			</Ranking>
@@ -77,6 +70,13 @@ const Ranking = styled.div`
 			cursor: pointer;
 			text-decoration: underline solid ${colors.white};
 		}
+	}
+
+	.title-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 120px; /* 원하는 너비에 맞게 설정 */
 	}
 
 	.list-info {
