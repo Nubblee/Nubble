@@ -40,9 +40,13 @@ const AddQuestion = () => {
 	useEffect(() => {
 		const getCodingTestList = async () => {
 			try {
-				const res = await axios.get(`${import.meta.env.VITE_NUBBLE_SERVER}/coding-problems`)
-				const data = res.data.problems.map((problem: any) => ({
-					id: problem.problemId, // problemId 필드를 id로 저장
+				const res = await axios.get<{ problems: Question[] }>(
+					`${import.meta.env.VITE_NUBBLE_SERVER}/coding-problems`,
+				)
+
+				// ProblemResponse 배열을 Question 배열로 변환
+				const data: Question[] = res.data.problems.map((problem) => ({
+					id: problem.id,
 					quizDate: problem.quizDate,
 					problemTitle: problem.problemTitle,
 				}))

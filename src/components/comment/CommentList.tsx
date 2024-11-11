@@ -9,6 +9,7 @@ import { formatDate } from '@/utils/formatDate'
 import { useAuthStore } from '@/stores/authStore'
 import useModalStore from '@/stores/modalStore'
 import Modal from '@components/Modal'
+import { ShowToast } from '@components/Toast'
 
 interface Comment {
 	commentId: number
@@ -46,24 +47,59 @@ const CommentList = () => {
 	const handleDelete = async (commentId: number, type: 'MEMBER' | 'GUEST', password?: string) => {
 		try {
 			if (type === 'MEMBER') {
-				await axios.delete(
-					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/member/${commentId}`,
-					{
-						headers: { 'SESSION-ID': sessionId },
+				// 멤버는 default 타입 모달 띄우기
+				openModal({
+					type: 'default',
+					title: '댓글 삭제 확인',
+					onAction: async () => {
+						try {
+							// 실제 삭제 요청
+							await axios.delete(
+								`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/member/${commentId}`,
+								{
+									headers: { 'SESSION-ID': sessionId },
+								},
+							)
+							ShowToast('댓글이 삭제되었습니다.', 'success')
+							// 삭제 후 상태 업데이트
+							setCommentsData((prevComments) =>
+								prevComments.filter((comment) => comment.commentId !== commentId),
+							)
+						} catch (error) {
+							console.error('댓글 삭제 중 에러 발생:', error)
+							ShowToast('댓글 삭제 중 오류가 발생했습니다.', 'failed')
+						}
 					},
-				)
+				})
 			} else {
-				// 비밀번호가 없는 경우 모달을 열어 비밀번호 요청
+				// 게스트는 password 타입 모달 띄우기
 				if (!password) {
 					openModal({
 						type: 'password',
 						title: '댓글 삭제 확인',
-						onAction: (inputPassword) => handleDelete(commentId, 'GUEST', inputPassword),
+						onAction: async (inputPassword) => {
+							try {
+								await axios.delete(
+									`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/guest/${commentId}`,
+									{
+										headers: { 'Content-Type': 'application/json' },
+										data: { guestPassword: inputPassword },
+									},
+								)
+								// 삭제 후 상태 업데이트는 여기에서 실행
+								setCommentsData((prevComments) =>
+									prevComments.filter((comment) => comment.commentId !== commentId),
+								)
+								ShowToast('댓글이 삭제되었습니다.', 'success')
+							} catch (error) {
+								ShowToast('비밀번호가 틀렸습니다.', 'failed')
+							}
+						},
 					})
 					return
 				}
 
-				// 비밀번호가 있는 경우 삭제 요청 진행
+				// 비밀번호가 제공된 경우 삭제 진행
 				await axios.delete(
 					`http://nubble-backend-eb-1-env.eba-f5sb82hp.ap-northeast-2.elasticbeanstalk.com/comments/guest/${commentId}`,
 					{
@@ -71,17 +107,15 @@ const CommentList = () => {
 						data: { guestPassword: password },
 					},
 				)
+				// 삭제 후 상태 업데이트
+				setCommentsData((prevComments) =>
+					prevComments.filter((comment) => comment.commentId !== commentId),
+				)
 			}
-
-			// 댓글 삭제 후 상태 업데이트
-			setCommentsData((prevComments) =>
-				prevComments.filter((comment) => comment.commentId !== commentId),
-			)
 		} catch (error) {
 			console.error('댓글 삭제 중 에러 발생:', error)
 		}
 	}
-
 	if (error) return <p>{error}</p>
 	if (!commentsData.length) return <p>댓글이 없습니다.</p>
 
