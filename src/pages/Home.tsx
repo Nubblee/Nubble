@@ -33,27 +33,6 @@ const coteContents = [
 	},
 ]
 
-const studyContents = [
-	{
-		id: 1,
-		title: 'Recoil, Justand',
-		userName: '손성오',
-		likes: 72,
-	},
-	{
-		id: 2,
-		title: 'Next.js 공부하는 법',
-		userName: '박지영',
-		likes: 68,
-	},
-	{
-		id: 3,
-		title: 'React.FC를 꼭 써야...',
-		userName: '김수민',
-		likes: 57,
-	},
-]
-
 interface Post {
 	createdAt: string
 	description: string
@@ -75,6 +54,7 @@ const Home = () => {
 	const [selectedTab, setSelectedTab] = useState<'cote' | 'study'>(initialTab)
 	const [selectedLv, setSelectedLv] = useState<string | null>(null)
 	const [selectedStudy, setSelectedStudy] = useState<string | null>(null)
+	const [bestStudyContents, setBestStudyContents] = useState([])
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
@@ -135,6 +115,29 @@ const Home = () => {
 		}
 
 		getPost()
+	}, [])
+
+	useEffect(() => {
+		const getBestStudyContents = async () => {
+			try {
+				const res = await axios.get(
+					`${import.meta.env.VITE_NUBBLE_SERVER}/boards/1/posts/popular`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					},
+				)
+				console.log(res.data.posts.slice(0, 3))
+				setBestStudyContents(res.data.posts.slice(0, 3))
+			} catch (error) {
+				console.log('베스트 스터디 게시글 가져오기 에러------->', error)
+			} finally {
+				setLoading(false)
+			}
+		}
+
+		getBestStudyContents()
 	}, [])
 
 	return (
@@ -257,7 +260,7 @@ const Home = () => {
 				</PostContainer>
 				<BestContentsContainer>
 					<BestContents title={'베스트 코딩 테스트'} content={coteContents} />
-					<BestContents title={'베스트 스터디 내용'} content={studyContents} />
+					<BestContents title={'베스트 스터디 내용'} content={bestStudyContents} />
 				</BestContentsContainer>
 			</ContentContainer>
 		</Container>
