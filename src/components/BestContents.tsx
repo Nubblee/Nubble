@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 interface ContentItem {
 	id: number
 	title: string
-	username: string
+	userName: string
 	likeCount: number
 }
 
@@ -22,14 +22,14 @@ const BestContents = ({ title, content }: BestContentsProps) => {
 			<div className="title">{title}</div>
 			<Ranking>
 				<ol>
-					{content.map(({ id, title, username, likeCount }, i) => (
-						<Link to={`/postDetail/스터디/@${username}/${encodeURIComponent(title)}/${id}`}>
+					{content.map(({ id, title, userName, likeCount }, i) => (
+						<Link to={`/postDetail/스터디/@${userName}/${encodeURIComponent(title)}/${id}`}>
 							<li key={id} className="list-container">
 								<div className="title-text">
 									{i + 1}. <span>{title}</span>
 								</div>
 								<div className="list-info">
-									<div className="user-name">{username}</div>
+									<div className="user-name">{userName}</div>
 									<Heart color={colors.primaryBlue} fill={colors.primaryBlue} size={16} />
 									<span>{likeCount}</span>
 								</div>

@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import axios from 'axios'
 
 const useFileUpload = () => {
-	const [failed, setFailed] = useState('')
 	const sessionId = localStorage.getItem('sessionId')
 
 	const uploadFile = async (file: File) => {
@@ -18,7 +16,7 @@ const useFileUpload = () => {
 			})
 			return res.data
 		} catch (error) {
-			setFailed('파일 업로드 실패')
+			console.error('faild to file upload', error)
 		}
 	}
 

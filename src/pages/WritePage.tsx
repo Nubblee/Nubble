@@ -48,7 +48,6 @@ const WritePage = () => {
 	} = useWrite()
 	const { uploadFile } = useFileUpload()
 	const { sessionId } = useAuthStore()
-	const [post, setPost] = useState(state?.postData || null)
 
 	const handleUploadFile = () => {
 		if (fileRef.current) {
@@ -152,14 +151,14 @@ const WritePage = () => {
 	}, [board])
 
 	useEffect(() => {
-		if (id && post) {
+		if (id && state?.postData) {
 			setIsEditing(true)
-			setTitle(post.title)
-			setContent(post.content)
-			setCategory(post.categoryId)
-			setBoard(post.boardId)
+			setTitle(state?.postData.title)
+			setContent(state?.postData.content)
+			setCategory(state?.postData.categoryId)
+			setBoard(state?.postData.boardId)
 		}
-	}, [id, post])
+	}, [id, state?.postData])
 
 	return (
 		<Container>

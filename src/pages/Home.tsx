@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import BestContents from '@components/BestContents'
 import Banner from '@components/Banner'
@@ -7,8 +7,6 @@ import { fontSize, fontWeight } from '@/constants/font'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import axios from 'axios'
-import { useCoteData } from '@/hooks/useCoteData'
-import { formatDate } from '@/utils/formatDate'
 import defaultImage from '@/assets/defaultImage.jpeg'
 import Loading from '@components/Loading'
 
@@ -17,19 +15,43 @@ const coteContents = [
 		id: 1,
 		title: 'Lv1. 다트게임',
 		userName: '김수민',
-		likes: 72,
+		likeCount: 72,
 	},
 	{
 		id: 2,
 		title: 'Lv1. 문자열 뒤의 n글자',
 		userName: '박지영',
-		likes: 68,
+		likeCount: 68,
 	},
 	{
 		id: 3,
 		title: 'Lv1. 체육복',
 		userName: '손성오',
-		likes: 57,
+		likeCount: 57,
+	},
+]
+
+const temporaryCote = [
+	{
+		id: 1,
+		title: 'Lv1. 다트게임',
+		createdAt: '2024.11.25',
+		userName: '김수민',
+		content: 'dart dart dart dart kk',
+	},
+	{
+		id: 2,
+		title: 'Lv1. 다트게임',
+		createdAt: '2024.11.25',
+		userName: '박지영',
+		content: 'dart dart dart dart kk',
+	},
+	{
+		id: 3,
+		title: 'Lv1. 다트게임',
+		createdAt: '2024.11.25',
+		userName: '손성오',
+		content: 'dart dart dart dart kk',
 	},
 ]
 
@@ -47,7 +69,6 @@ const Home = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const login = useAuthStore((state) => state.login)
-	const { commitData } = useCoteData()
 	const [studyBoards, setStudyBoards] = useState<Post[]>([])
 	const queryParams = new URLSearchParams(location.search)
 	const initialTab = (queryParams.get('tab') as 'cote' | 'study') || 'cote'
@@ -88,13 +109,13 @@ const Home = () => {
 		navigate(`?tab=${tab}`)
 	}
 
-	const filteredCommitData = commitData.filter((data) => {
+	const filteredCommitData = temporaryCote.filter((data) => {
 		if (!selectedLv) return true
 		return data.title.startsWith(selectedLv)
 	})
 
 	useEffect(() => {
-		const startTime = performance.now()
+		//const startTime = performance.now()
 		const getPost = async () => {
 			try {
 				const res = await axios.get(`${import.meta.env.VITE_NUBBLE_SERVER}/boards/1`, {
@@ -104,7 +125,7 @@ const Home = () => {
 				})
 				// console.log(res.data.posts)
 				setStudyBoards(res.data.posts)
-				const endTime = performance.now()
+				//const endTime = performance.now()
 				// const duration = endTime - startTime
 				// console.log(`Study API 호출 소요 시간: ${duration.toFixed(2)}ms`)
 			} catch (error) {
@@ -188,16 +209,16 @@ const Home = () => {
 									<ul>
 										{filteredCommitData.map((data) => (
 											<Link
-												to={`/postDetail/코딩테스트/@${data.author}/${data.title}`}
-												key={`${data.title}-${data.author}`}
+												to={`/postDetail/코딩테스트/@${data.userName}/${data.title}`}
+												key={`${data.title}-${data.userName}`}
 											>
 												<li className="post-list">
 													<div>
 														<div className="title-container">
 															<div className="title">{data.title}</div>
 															<div className="post-info">
-																<div className="author">{data.author}</div>
-																<div className="date">{formatDate(data.date)}</div>
+																<div className="author">{data.userName}</div>
+																<div className="date">{data.createdAt}</div>
 															</div>
 														</div>
 														<div className="content">{data.content}</div>
