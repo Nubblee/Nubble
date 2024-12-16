@@ -11,7 +11,13 @@ import { useAuthStore } from '@/stores/authStore'
 import 'swiper/swiper-bundle.css'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { coteDataProps } from '@/hooks/useCoteData'
+
+export interface coteDataProps {
+	problemId: number
+	quizDate: string
+	problemTitle: string
+	url: string
+}
 
 const formatDate = (date: Date) => {
 	return dayjs(date).locale('ko').format('YYYY년 MM월 DD일')

@@ -21,7 +21,7 @@ const CommentForm = () => {
 	})
 	const [isButtonDisabled, setIsButtonDisabled] = useState(true)
 	const [nicknameError, setNicknameError] = useState('') // 경고 문구 상태 관리
-	const [submitSuccess, setSubmitSuccess] = useState(false) // 제출 성공 여부 상태
+	//const [submitSuccess, setSubmitSuccess] = useState(false) // 제출 성공 여부 상태
 
 	// 모든 입력 필드가 채워졌는지 확인하는 로직
 	useEffect(() => {
@@ -56,10 +56,10 @@ const CommentForm = () => {
 		e.preventDefault()
 
 		// 로그인된 상태일 경우 userName을 nickname으로 설정
-		const submittedData = {
-			...formData,
-			nickname: isLogin ? userName : formData.nickname,
-		}
+		// const submittedData = {
+		// 	...formData,
+		// 	nickname: isLogin ? userName : formData.nickname,
+		// }
 
 		try {
 			if (!isLogin) {
@@ -69,11 +69,11 @@ const CommentForm = () => {
 				const res = await postMemberComment()
 				console.log('멤버 댓글 제출', res.data)
 			}
-			setSubmitSuccess(true)
+			//setSubmitSuccess(true)
 			setFormData({ nickname: '', password: '', comment: '' })
 		} catch (error) {
 			console.error('Error submitting comment:', error)
-			setSubmitSuccess(false)
+			//setSubmitSuccess(false)
 		}
 	}
 

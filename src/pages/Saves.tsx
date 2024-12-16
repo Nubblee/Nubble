@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from '@emotion/styled'
 import { fontSize, fontWeight } from '@/constants/font'
 import { Trash2 } from 'lucide-react'
